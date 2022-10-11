@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="NsHGI3" name="Harmonica" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+  <MAINGROUP id="tQmp1t" name="Harmonica">
+    <GROUP id="{BC2D93F3-9E1D-BE85-A51B-6D81A51D9671}" name="Source">
+      <GROUP id="{AB950AF8-D301-66C7-588B-13C655B7D45E}" name="GUI">
+        <GROUP id="{C14D3D41-F4A1-6D83-84D7-291750EF4354}" name="About">
+          <FILE id="LuKQh7" name="AboutOverlay.cpp" compile="1" resource="0"
+                file="Source/GUI/About/AboutOverlay.cpp"/>
+          <FILE id="gBIY2k" name="AboutOverlay.h" compile="0" resource="0" file="Source/GUI/About/AboutOverlay.h"/>
+          <FILE id="OFoHi2" name="AboutWindow.cpp" compile="1" resource="0" file="Source/GUI/About/AboutWindow.cpp"/>
+          <FILE id="hlc8aI" name="AboutWindow.h" compile="0" resource="0" file="Source/GUI/About/AboutWindow.h"/>
+          <FILE id="AKoUdV" name="WebsiteButton.cpp" compile="1" resource="0"
+                file="Source/GUI/About/WebsiteButton.cpp"/>
+          <FILE id="PVNDk9" name="WebsiteButton.h" compile="0" resource="0" file="Source/GUI/About/WebsiteButton.h"/>
+        </GROUP>
+        <GROUP id="{BFA3AAE9-3E14-A027-A1F2-3CC135571B60}" name="Misc">
+          <FILE id="GE9Ps9" name="HueControl.cpp" compile="1" resource="0" file="Source/GUI/Misc/HueControl.cpp"/>
+          <FILE id="LjWOxT" name="HueControl.h" compile="0" resource="0" file="Source/GUI/Misc/HueControl.h"/>
+          <FILE id="rLYqrN" name="Logo.cpp" compile="1" resource="0" file="Source/GUI/Misc/Logo.cpp"/>
+          <FILE id="j89AIs" name="Logo.h" compile="0" resource="0" file="Source/GUI/Misc/Logo.h"/>
+        </GROUP>
+        <GROUP id="{B8669454-7DD1-2FB7-F041-61EFB24B05DA}" name="Utils">
+          <FILE id="sxXVNr" name="FullSlider.cpp" compile="1" resource="0" file="Source/GUI/Utils/FullSlider.cpp"/>
+          <FILE id="wlBA1m" name="FullSlider.h" compile="0" resource="0" file="Source/GUI/Utils/FullSlider.h"/>
+          <FILE id="sezDh1" name="GuiData.h" compile="0" resource="0" file="Source/GUI/Utils/GuiData.h"/>
+        </GROUP>
+        <FILE id="AY5eB3" name="WindowLayout.cpp" compile="1" resource="0"
+              file="Source/GUI/WindowLayout.cpp"/>
+        <FILE id="UFaVMx" name="WindowLayout.h" compile="0" resource="0" file="Source/GUI/WindowLayout.h"/>
+      </GROUP>
+      <GROUP id="{E0424A26-3AAD-0E55-61C4-97282689D178}" name="Harmonica">
+        <FILE id="Q6CGCa" name="Harmonica.cpp" compile="1" resource="0" file="Source/Harmonica/Harmonica.cpp"/>
+        <FILE id="rNcRHl" name="Harmonica.h" compile="0" resource="0" file="Source/Harmonica/Harmonica.h"/>
+      </GROUP>
+      <FILE id="fDrQHH" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="OX1rBz" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="InOC7N" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="aytTxV" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Harmonica"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Harmonica"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../../../JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+</JUCERPROJECT>

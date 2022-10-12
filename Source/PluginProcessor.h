@@ -64,6 +64,7 @@ private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
     
     WDYM::Harmonica harmonica;
+    juce::dsp::DryWetMixer<float> dryWetMix;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HarmonicaAudioProcessor)

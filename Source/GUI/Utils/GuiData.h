@@ -23,22 +23,22 @@ struct DefaultLookAndFeel
 
     void updateLnf() { juce::LookAndFeel::setDefaultLookAndFeel(lnf); }
 
-    juce::CustomLook diodide;
+    juce::CustomLook harmonica;
 
     // Change to desired LookAndFeel
-    juce::CustomLook* lnf = &diodide;
+    juce::CustomLook* lnf = &harmonica;
 };
 
 struct GuiData
 {
-    GuiData(DiodineAudioProcessor& p, DefaultLookAndFeel& defLnf, double& s, juce::ApplicationProperties& props)
+    GuiData(HarmonicaAudioProcessor& p, DefaultLookAndFeel& defLnf, double& s, juce::ApplicationProperties& props)
         : audioProcessor(p), scale(s), defaultLnf(defLnf), properties(props) 
     {}
 
     void updateLnf(int skin) 
     { 
-        if (skin == diodide)
-            defaultLnf.lnf = &defaultLnf.diodide;
+        if (skin == harmonica)
+            defaultLnf.lnf = &defaultLnf.harmonica;
         else
             jassertfalse; // wrong index (too many items?)
 
@@ -48,7 +48,7 @@ struct GuiData
         properties.saveIfNeeded();
     }
 
-    DiodineAudioProcessor& audioProcessor;
+    HarmonicaAudioProcessor& audioProcessor;
     double& scale;
     DefaultLookAndFeel& defaultLnf;
     juce::ApplicationProperties& properties;
@@ -57,7 +57,7 @@ struct GuiData
     std::function<void()> showAbout;
 
 private:
-    enum skinEnum { diodide };
+    enum skinEnum { harmonica };
 
 };
 } //namespace xynth

@@ -96,8 +96,13 @@ void HarmonicaAudioProcessor::changeProgramName (int index, const juce::String& 
 //==============================================================================
 void HarmonicaAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Start diode sim
-    harmonica.init(sampleRate, samplesPerBlock);
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = 2;
+    spec.sampleRate = sampleRate;
+
+    harmonica.prepareToPlay(samplesPerBlock, sampleRate);
+    dryWetMix.prepare(spec);
 }
 
 void HarmonicaAudioProcessor::releaseResources()
@@ -142,7 +147,16 @@ void HarmonicaAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         buffer.clear (i, 0, buffer.getNumSamples());
 
     juce::dsp::AudioBlock<float> block(buffer);
+
+    auto mix = treeState.getRawParameterValue(MIX_ID)->load();
+    dryWetMix.setWetMixProportion(mix);
+
+    dryWetMix.pushDrySamples(block);
+
     harmonica.process(block, midiMessages);
+
+    dryWetMix.mixWetSamples(block);
+
 }
 
 //==============================================================================
@@ -153,7 +167,8 @@ bool HarmonicaAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* HarmonicaAudioProcessor::createEditor()
 {
-    return new HarmonicaAudioProcessorEditor(*this);
+    return new juce::GenericAudioProcessorEditor(*this);
+    //return new HarmonicaAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -187,21 +202,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout HarmonicaAudioProcessor::cre
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(GAIN_ID, GAIN_NAME,         1.f,  20.f,   5.f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(SAT_ID,  SAT_NAME,          0.f,   0.5f,  0.1f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(VF_ID,   VF_NAME,           0.f,   5.f,   0.2f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(VB_ID,   VB_NAME,         -20.f,   0.f, -12.f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(TRR_ID,  TRR_NAME,          0.f,  20.f,   2.f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(TRR_MAG_ID, TRR_MAG_NAME,   0.f,   2.f,   1.f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(TRR_SKEW_ID, TRR_SKEW_NAME, 0.f,   0.7f,  0.1f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(MIX_ID,  MIX_NAME,          0.f,   2.f,   1.f));
-
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(HUE_ID, HUE_NAME, 0.f, 360.f, 25.f));
-
-    params.push_back(std::make_unique<juce::AudioParameterBool>(DIODE_1_ID, DIODE_1_NAME, true ));
-    params.push_back(std::make_unique<juce::AudioParameterBool>(DIODE_2_ID, DIODE_2_NAME, false));
-
-    params.push_back(std::make_unique<juce::AudioParameterBool>(DC_OFF_ID, DC_OFF_NAME, true));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(MIX_ID,  MIX_NAME,          0.f,   1.f,   0.5f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(WINDOW_LEN_ID, WINDOW_LEN_NAME, 10, 100, 20));
 
     return { params.begin(), params.end() };
 }

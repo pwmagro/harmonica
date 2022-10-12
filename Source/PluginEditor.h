@@ -16,11 +16,11 @@
 //==============================================================================
 /**
 */
-class DiodineAudioProcessorEditor  : public juce::AudioProcessorEditor
+class HarmonicaAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
-    DiodineAudioProcessorEditor (DiodineAudioProcessor&);
-    ~DiodineAudioProcessorEditor() override;
+    HarmonicaAudioProcessorEditor (HarmonicaAudioProcessor&);
+    ~HarmonicaAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
@@ -36,7 +36,7 @@ private:
     xynth::GuiData guiData;
     WindowLayout windowLayout;
 
-    DiodineAudioProcessor& audioProcessor;
+    HarmonicaAudioProcessor& audioProcessor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DiodineAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HarmonicaAudioProcessorEditor)
 };

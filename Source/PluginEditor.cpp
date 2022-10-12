@@ -6,7 +6,7 @@
   ==============================================================================
 */
 
-#define APPLICATION_NAME "Diodine"
+#define APPLICATION_NAME "Harmonica"
 #define FILENAME_SUFFIX ".settings"
 #define FOLDER_NAME "WDYM"
 
@@ -14,10 +14,9 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-DiodineAudioProcessorEditor::DiodineAudioProcessorEditor (DiodineAudioProcessor& p)
+HarmonicaAudioProcessorEditor::HarmonicaAudioProcessorEditor (HarmonicaAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p), guiData(p, *defaultLnf, scale, properties), windowLayout(guiData)
 {
-
     juce::PropertiesFile::Options fileOptions;
     fileOptions.applicationName = APPLICATION_NAME;
     fileOptions.filenameSuffix = FILENAME_SUFFIX;
@@ -49,16 +48,16 @@ DiodineAudioProcessorEditor::DiodineAudioProcessorEditor (DiodineAudioProcessor&
     addAndMakeVisible(windowLayout);
 }
 
-DiodineAudioProcessorEditor::~DiodineAudioProcessorEditor()
+HarmonicaAudioProcessorEditor::~HarmonicaAudioProcessorEditor()
 {
 }
 
 //==============================================================================
-void DiodineAudioProcessorEditor::paint (juce::Graphics& g)
+void HarmonicaAudioProcessorEditor::paint (juce::Graphics& g)
 {
 }
 
-void DiodineAudioProcessorEditor::resized() {
+void HarmonicaAudioProcessorEditor::resized() {
     localWidth = getWidth();
     localHeight = getHeight();
 

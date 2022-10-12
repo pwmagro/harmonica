@@ -11,7 +11,7 @@
 #include "Logo.h"
 
 Logo::Logo(xynth::GuiData& g) : guiData(g), button(ABOUT_ID, juce::DrawableButton::ButtonStyle::ImageFitted) {
-    logo_xml = juce::parseXML(BinaryData::diodine_logo_svg);
+    logo_xml = juce::parseXML(juce::File());
     logo_en_svg = juce::Drawable::createFromSVG(*logo_xml);
     logo_en_svg->setColour(100, juce::Colour::fromRGB(0x8a, 0xdf, 0xce));
     logo_en_svg->replaceColour(juce::Colours::black, guiData.getLnf().getFgColor());

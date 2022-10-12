@@ -10,29 +10,42 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "../GUI/Utils/GuiData.h"
+#include "../Common/FixedWidthBuffer.h"
+#include "../Common/RingBuffer.h"
+#include "MidiQueue.h"
+
+#define NUM_VOICES (size_t)16
 
 namespace WDYM {
-    class Harmonica : public juce::Component {
+    class Harmonica : public juce::AudioAppComponent {
     public:
         Harmonica();
-        void init(float sampleRate, int samplesPerBlock);
+        void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+        void releaseResources() override {}
         void process(juce::dsp::AudioBlock<float>& audioBlock, juce::MidiBuffer& midi);
+        void pushNextSampleIntoFifo(float sample) noexcept;
+        void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
 
     private:
-        void pushNextSampleIntoFifo(float sample);
+        void scan(float *s, int index, int channelIndex);
+        void panic() { noteRR.panic(); }
 
-        static constexpr auto fftOrder = 12;
-        static constexpr auto fftSize = 1 << fftOrder;
-        static constexpr auto numVoices = 16;
+        midiQueue_t noteRR;
 
-        std::array<float, numVoices> inFreqs;
-        std::array<bool, numVoices> voiceActive;
+        float samplesPerMs = 44.1f;
+        float sampleRate = 44100.f;
+        float frameLength = 10;     // length of frame in ms
 
-        juce::dsp::FFT forwardFFT;
-        std::array<float, fftSize> fifo;
+        static constexpr auto order = 12;
+        static constexpr auto fftSize = 1 << order;
         std::array<float, fftSize * 2> fftData;
+        std::array<float, fftSize> fifo;
         int fifoIndex = 0;
         bool nextFFTBlockReady = false;
+
+        std::array<float, fftSize> fourierFreqs;
+        xynth::RingBuffer rb[2];
+
+        juce::dsp::FFT fourier;
     };
 }

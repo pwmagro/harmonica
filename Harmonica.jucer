@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="NsHGI3" name="Harmonica" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginCharacteristicsValue="pluginWantsMidiIn">
   <MAINGROUP id="tQmp1t" name="Harmonica">
     <GROUP id="{BC2D93F3-9E1D-BE85-A51B-6D81A51D9671}" name="Source">
+      <GROUP id="{775DBF77-EFF8-C991-639C-EC1D8442BCC1}" name="Common">
+        <FILE id="i1Siud" name="Constants.cpp" compile="1" resource="0" file="Source/Common/Constants.cpp"/>
+        <FILE id="VHzMbE" name="Constants.h" compile="0" resource="0" file="Source/Common/Constants.h"/>
+        <FILE id="OPLGtx" name="FixedWidthBuffer.cpp" compile="1" resource="0"
+              file="Source/Common/FixedWidthBuffer.cpp"/>
+        <FILE id="n2T8sL" name="FixedWidthBuffer.h" compile="0" resource="0"
+              file="Source/Common/FixedWidthBuffer.h"/>
+        <FILE id="UFYrI8" name="RingBuffer.cpp" compile="1" resource="0" file="Source/Common/RingBuffer.cpp"/>
+        <FILE id="k7z4iT" name="RingBuffer.h" compile="0" resource="0" file="Source/Common/RingBuffer.h"/>
+      </GROUP>
       <GROUP id="{AB950AF8-D301-66C7-588B-13C655B7D45E}" name="GUI">
         <GROUP id="{C14D3D41-F4A1-6D83-84D7-291750EF4354}" name="About">
           <FILE id="LuKQh7" name="AboutOverlay.cpp" compile="1" resource="0"
@@ -16,8 +26,6 @@
           <FILE id="PVNDk9" name="WebsiteButton.h" compile="0" resource="0" file="Source/GUI/About/WebsiteButton.h"/>
         </GROUP>
         <GROUP id="{BFA3AAE9-3E14-A027-A1F2-3CC135571B60}" name="Misc">
-          <FILE id="GE9Ps9" name="HueControl.cpp" compile="1" resource="0" file="Source/GUI/Misc/HueControl.cpp"/>
-          <FILE id="LjWOxT" name="HueControl.h" compile="0" resource="0" file="Source/GUI/Misc/HueControl.h"/>
           <FILE id="rLYqrN" name="Logo.cpp" compile="1" resource="0" file="Source/GUI/Misc/Logo.cpp"/>
           <FILE id="j89AIs" name="Logo.h" compile="0" resource="0" file="Source/GUI/Misc/Logo.h"/>
         </GROUP>
@@ -33,6 +41,7 @@
       <GROUP id="{E0424A26-3AAD-0E55-61C4-97282689D178}" name="Harmonica">
         <FILE id="Q6CGCa" name="Harmonica.cpp" compile="1" resource="0" file="Source/Harmonica/Harmonica.cpp"/>
         <FILE id="rNcRHl" name="Harmonica.h" compile="0" resource="0" file="Source/Harmonica/Harmonica.h"/>
+        <FILE id="FOUJey" name="MidiQueue.h" compile="0" resource="0" file="Source/Harmonica/MidiQueue.h"/>
       </GROUP>
       <FILE id="fDrQHH" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

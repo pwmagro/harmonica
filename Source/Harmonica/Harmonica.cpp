@@ -12,6 +12,11 @@
 
 namespace WDYM {
     Harmonica::Harmonica() : fourier(order), fftData(), fifo(), fourierFreqs() {
+        setAudioChannels(2, 2);
+    }
+
+    Harmonica::~Harmonica() {
+        shutdownAudio();
     }
 
     void Harmonica::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {

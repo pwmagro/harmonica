@@ -20,6 +20,7 @@ namespace WDYM {
     class Harmonica : public juce::AudioAppComponent {
     public:
         Harmonica();
+        ~Harmonica();
         void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
         void releaseResources() override {}
         void process(juce::dsp::AudioBlock<float>& audioBlock, juce::MidiBuffer& midi);

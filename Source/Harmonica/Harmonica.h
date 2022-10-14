@@ -13,21 +13,23 @@
 #include "../Common/FixedWidthBuffer.h"
 #include "../Common/RingBuffer.h"
 #include "MidiQueue.h"
+#include "Voice.h"
+#include "../Common/Squeeze.h"
 
-#define NUM_VOICES (size_t)16
+#define NUM_VOICES (size_t)8
 
 namespace WDYM {
-    class Harmonica : public juce::AudioAppComponent {
+    class Harmonica : public juce::Component {
     public:
-        Harmonica();
+        Harmonica(juce::ThreadPool& tp);
         ~Harmonica();
-        void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
-        void releaseResources() override {}
+        void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
         void process(juce::dsp::AudioBlock<float>& audioBlock, juce::MidiBuffer& midi);
         void pushNextSampleIntoFifo(float sample) noexcept;
-        void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
 
     private:
+        SineTable sineTable;
+
         void scan(float *s, int index, int channelIndex);
         void panic() { noteRR.panic(); }
 
@@ -37,7 +39,7 @@ namespace WDYM {
         float sampleRate = 44100.f;
         float frameLength = 10;     // length of frame in ms
 
-        static constexpr auto order = 12;
+        static constexpr auto order = 10;
         static constexpr auto fftSize = 1 << order;
         std::array<float, fftSize * 2> fftData;
         std::array<float, fftSize> fifo;
@@ -48,5 +50,8 @@ namespace WDYM {
         xynth::RingBuffer rb[2];
 
         juce::dsp::FFT fourier;
+
+        std::array<Voice*, NUM_VOICES> voices;
+        juce::ThreadPool& threadPool;
     };
 }

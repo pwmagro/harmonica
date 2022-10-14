@@ -25,6 +25,7 @@ public:
     maxmin_t readSamples();
     size_t getBufferSize() { return buffer.size(); }
     float readNextSample();
+    bool sampleAvailable() { return read != writeAtomic.load(); }
 
 
 private:

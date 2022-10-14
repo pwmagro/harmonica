@@ -21,7 +21,7 @@ HarmonicaAudioProcessor::HarmonicaAudioProcessor()
                      #endif
                        ),
     treeState (*this, nullptr, "Parameters", createParameters()),
-    harmonica()
+    harmonica(threadPool)
 #endif
 {
 
@@ -102,7 +102,7 @@ void HarmonicaAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     spec.sampleRate = sampleRate;
 
     harmonica.prepareToPlay(samplesPerBlock, sampleRate);
-    dryWetMix.prepare(spec);
+    //dryWetMix.prepare(spec);
 }
 
 void HarmonicaAudioProcessor::releaseResources()
@@ -147,15 +147,12 @@ void HarmonicaAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         buffer.clear (i, 0, buffer.getNumSamples());
 
     juce::dsp::AudioBlock<float> block(buffer);
+    //buffer.clear();
 
-    auto mix = treeState.getRawParameterValue(MIX_ID)->load();
-    dryWetMix.setWetMixProportion(mix);
-
-    dryWetMix.pushDrySamples(block);
-
+    //DBG(buffer.getReadPointer(0)[0]);
     harmonica.process(block, midiMessages);
-
-    dryWetMix.mixWetSamples(block);
+    //DBG(buffer.getReadPointer(0)[0]);
+    //DBG('\n');
 
 }
 

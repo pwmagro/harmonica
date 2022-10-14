@@ -11,14 +11,19 @@
 #include "Harmonica.h"
 
 namespace WDYM {
-    Harmonica::Harmonica() : fourier(order), fftData(), fifo(), fourierFreqs() {
-        setAudioChannels(2, 2);
+    Harmonica::Harmonica(juce::ThreadPool& tp) : fourier(order), fftData(), fifo(), fourierFreqs(), threadPool(tp), sineTable() {
+        for (int i = 0; i < voices.size(); i++) {
+            voices[i] = new Voice(sineTable, tp);
+        }
+
     }
 
     Harmonica::~Harmonica() {
-        shutdownAudio();
+        for (int i = 0; i < voices.size(); i++) {
+            delete voices[i];
+        }
     }
-
+    
     void Harmonica::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {
         samplesPerMs = sampleRate / 1000.f;
         this->sampleRate = sampleRate;
@@ -34,6 +39,14 @@ namespace WDYM {
 
         rb[0].prepare(spec);
         rb[1].prepare(spec);
+        
+        for (int i = 0; i < voices.size(); i++) {
+            voices[i]->prepare(spec);
+        }
+
+        for (int i = 0; i < NUM_VOICES; i++) {
+            voices[i]->sawTest((i + 1) * 110.f);
+        }
     }
 
     void Harmonica::process(juce::dsp::AudioBlock<float>& audioBlock, juce::MidiBuffer& midi) {
@@ -52,34 +65,64 @@ namespace WDYM {
             jassertfalse;
         }
 
-        for (int c = 0; c < audioBlock.getNumChannels(); c++) {
-            auto ch = audioBlock.getChannelPointer(c);
-            for (int s = 0; s < audioBlock.getNumSamples(); s++) {
-                pushNextSampleIntoFifo(ch[s]);
-                if (nextFFTBlockReady) {
-                    fourier.performRealOnlyForwardTransform(fftData.data());
-                    nextFFTBlockReady = false;
+        audioBlock.clear();
 
-                    if (noteRR.midiQ.empty()) continue;
+        juce::AudioBuffer<float> workingBuffer(2, audioBlock.getNumSamples());
+        workingBuffer.copyFrom(0, 0, audioBlock.getChannelPointer(0), audioBlock.getNumSamples());
+        workingBuffer.copyFrom(1, 0, audioBlock.getChannelPointer(1), audioBlock.getNumSamples());
+        auto workingBlock = juce::dsp::AudioBlock<float>(workingBuffer);
 
-                    auto max = juce::FloatVectorOperations::findMaximum(fftData.data(), fftSize / 64);
-                    auto maxIndex = std::distance(fftData.begin(), std::find(fftData.begin(), fftData.end(), max));
-                    fftData[maxIndex] = 0;
+        auto ctx = juce::dsp::ProcessContextReplacing<float>(workingBlock);
 
-                    auto targetFreq = noteRR.midiQ.front().hz;
-                    auto targetIndex = std::distance(fourierFreqs.begin(), std::find(fourierFreqs.begin(), fourierFreqs.end(), juce::roundToInt(targetFreq)));
-                    fftData[targetIndex] = max;
+        auto voiceProcess = [&](int i) {
+            if (voices[i]->isPlaying()) {
+                voices[i]->process(audioBlock);
+            }
+        };
 
-                    fourier.performRealOnlyInverseTransform(fftData.data());
+        squeeze::ParallelFor(threadPool, (size_t)0, NUM_VOICES, voiceProcess);
 
-                    float* data = fftData.data();
-                    float** datadata = &data;
-                    juce::dsp::AudioBlock<float> temp(datadata, 1, fftSize);
-                    rb[c].writeSamples(temp);
-                }
+        for (int i = 0; i < NUM_VOICES; i++) {
+            if (voices[i]->isPlaying()) {
+                auto b = *(voices[i]->readBack());
+                juce::FloatVectorOperations::add(audioBlock.getChannelPointer(0), b[0].data(), audioBlock.getNumSamples());
+                juce::FloatVectorOperations::add(audioBlock.getChannelPointer(1), b[1].data(), audioBlock.getNumSamples());
             }
         }
-        audioBlock.clear();
+
+        //audioBlock.copyFrom(ctx.getOutputBlock());
+
+        //for (int s = 0; s < audioBlock.getNumSamples(); s++) {
+        //    for (int c = 0; c < 1/*audioBlock.getNumChannels()*/; c++) {
+        //        auto ch = audioBlock.getChannelPointer(c);
+        //        pushNextSampleIntoFifo(ch[s]);
+        //        if (nextFFTBlockReady) {
+        //            fourier.performRealOnlyForwardTransform(fftData.data());
+        //            nextFFTBlockReady = false;
+
+        //            if (noteRR.midiQ.empty()) continue;
+
+        //            auto max = juce::FloatVectorOperations::findMaximum(fftData.data(), fftSize / 64);
+        //            auto maxIndex = std::distance(fftData.begin(), std::find(fftData.begin(), fftData.end(), max));
+        //            fftData[maxIndex] = 0;
+
+        //            auto targetFreq = noteRR.midiQ.front().hz;
+        //            auto targetIndex = std::distance(fourierFreqs.begin(), std::find(fourierFreqs.begin(), fourierFreqs.end(), juce::roundToInt(targetFreq)));
+        //            fftData[targetIndex] = max;
+
+        //            fourier.performRealOnlyInverseTransform(fftData.data());
+
+        //            float* data = fftData.data();
+        //            float** datadata = &data;
+        //            juce::dsp::AudioBlock<float> temp(datadata, 1, fftSize);
+        //            rb[c].writeSamples(temp);
+        //        }
+        //        if (rb[c].sampleAvailable())
+        //            ch[s] = rb[c].readNextSample();
+        //        else
+        //            ch[s] = 0;
+        //    }
+        //}
     }
 
     void Harmonica::pushNextSampleIntoFifo(float sample) noexcept
@@ -99,15 +142,5 @@ namespace WDYM {
         }
 
         fifo[(size_t)fifoIndex++] = sample; // [9]
-    }
-
-    void Harmonica::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) {
-        auto n = bufferToFill.numSamples;
-        for (int i = 0; i < 2; i++) {
-            auto ch = bufferToFill.buffer->getWritePointer(i);
-            for (int j = 0; j < n; j++) {
-                ch[j] = rb[i].readNextSample();
-            }
-        }
     }
 }

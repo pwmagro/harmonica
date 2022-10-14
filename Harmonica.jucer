@@ -13,6 +13,7 @@
               file="Source/Common/FixedWidthBuffer.h"/>
         <FILE id="UFYrI8" name="RingBuffer.cpp" compile="1" resource="0" file="Source/Common/RingBuffer.cpp"/>
         <FILE id="k7z4iT" name="RingBuffer.h" compile="0" resource="0" file="Source/Common/RingBuffer.h"/>
+        <FILE id="R749P8" name="Squeeze.h" compile="0" resource="0" file="Source/Common/Squeeze.h"/>
       </GROUP>
       <GROUP id="{AB950AF8-D301-66C7-588B-13C655B7D45E}" name="GUI">
         <GROUP id="{C14D3D41-F4A1-6D83-84D7-291750EF4354}" name="About">
@@ -42,6 +43,10 @@
         <FILE id="Q6CGCa" name="Harmonica.cpp" compile="1" resource="0" file="Source/Harmonica/Harmonica.cpp"/>
         <FILE id="rNcRHl" name="Harmonica.h" compile="0" resource="0" file="Source/Harmonica/Harmonica.h"/>
         <FILE id="FOUJey" name="MidiQueue.h" compile="0" resource="0" file="Source/Harmonica/MidiQueue.h"/>
+        <FILE id="o9WUDw" name="SineTable.cpp" compile="1" resource="0" file="Source/Harmonica/SineTable.cpp"/>
+        <FILE id="UHsIk4" name="SineTable.h" compile="0" resource="0" file="Source/Harmonica/SineTable.h"/>
+        <FILE id="CKCxvG" name="Voice.cpp" compile="1" resource="0" file="Source/Harmonica/Voice.cpp"/>
+        <FILE id="NhB9Ts" name="Voice.h" compile="0" resource="0" file="Source/Harmonica/Voice.h"/>
       </GROUP>
       <FILE id="fDrQHH" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
@@ -54,7 +59,8 @@
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
   <EXPORTFORMATS>
-    <VS2022 targetFolder="Builds/VisualStudio2022">
+    <VS2022 targetFolder="Builds/VisualStudio2022" extraCompilerFlags="-fopenmp"
+            IPP1ALibrary="Dynamic_Library">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="Harmonica"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="Harmonica"/>

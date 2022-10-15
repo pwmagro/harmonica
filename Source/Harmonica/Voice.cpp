@@ -32,18 +32,13 @@ namespace WDYM {
         localBuff[0].clear();
         localBuff[1].clear();
 
-        // lambda here for potential future parallelization
-        // Gets current left and right sample and writes to buffer
-        auto fillBuff = [&](int s) {
+        for (int s = 0; s < audio.getNumSamples(); s++) {
             Voice::StereoSample sample = getNextSample();
 
             localBuff[0].push_back(sample.l * amp);
             localBuff[1].push_back(sample.r * amp);
-        };
-
-        for (int s = 0; s < audio.getNumSamples(); s++) {
-            fillBuff(s);
         }
+
     }
 
     std::array<std::vector<float>, 2>* Voice::readBack() {
@@ -52,19 +47,29 @@ namespace WDYM {
 
     void Voice::sawTest(float freq) {
         enabled = true;
+        amp = 0.125;
 
         // get a square on left, saw on right
-        for (int i = 0; i < ORDER; i++) {
-            setOscParams(voices.left[i], freq * (i + 1), ((i + 1) % 2) / (float)(2 * (i + 1)));
-            setOscParams(voices.right[i], freq * (i + 1), 1 / (float)(2 * (i + 1)));
+        for (int i = 0; i < SIMD_CNT; i++) {
+            for (int j = 0; j < simdSize; j++) {
+                setOscParams(voices.left[i], freq * ((i * simdSize) + j + 1), (((i * simdSize) + j + 1) % 2) / (float)(2 * ((i * simdSize) + j + 1)), j);
+                setOscParams(voices.right[i], freq * ((i * simdSize) + j + 1), 1 / (float)(2 * ((i * simdSize) + j + 1)), j);
+            }
         }
     }
 
-    void Voice::setOscParams(Osc& osc, float freq, float amp) {
+    void Voice::sinTest(float freq) {
+        enabled = true;
+
+        setOscParams(voices.left[0], freq, 1, 0);
+        setOscParams(voices.right[0], freq, 1, 0);
+    }
+
+    void Voice::setOscParams(Osc& osc, float freq, float amp, int simdIndex) {
         auto stepSize = sineTable.getWidth() * freq / (float)spec.sampleRate;
-        osc.stepSize = stepSize;
-        osc.amplitude = std::min(amp, 1.f);
-        osc.en = (freq <= NYQUIST_FR && amp > 0);
+        osc.stepSize.set(simdIndex, stepSize);
+        osc.amplitude.set(simdIndex, std::min(amp, 1.f));
+        osc.en.set(simdIndex, freq <= NYQUIST_FR && amp > 0);
     }
 
     Voice::StereoSample Voice::getNextSample() {
@@ -74,11 +79,15 @@ namespace WDYM {
         auto getSample = [&](int i) {
             auto& losc = voices.left[i];
             auto& rosc = voices.right[i];
-            oscOutputs[0][i] = sineTable.getSample(losc.phase + losc.phaseOffset) * losc.amplitude;
-            oscOutputs[1][i] = sineTable.getSample(rosc.phase + losc.phaseOffset) * rosc.amplitude;
 
-            losc.phase = fmod((losc.phase + losc.stepSize), sineTable.getWidth());
-            rosc.phase = fmod((rosc.phase + rosc.stepSize), sineTable.getWidth());
+            auto lSampleChunk = (sineTable.getSample(losc.phase + losc.phaseOffset) * losc.amplitude).sum();
+            auto rSampleChunk = (sineTable.getSample(rosc.phase + rosc.phaseOffset) * rosc.amplitude).sum();
+
+            oscOutputs[0][i] = lSampleChunk;
+            oscOutputs[1][i] = rSampleChunk;
+
+            losc.phase = SineTable::simdFmod((losc.phase + losc.stepSize), sineTable.getWidth());
+            rosc.phase = SineTable::simdFmod((rosc.phase + rosc.stepSize), sineTable.getWidth());
         };
 
         Voice::StereoSample retVal;
@@ -86,7 +95,7 @@ namespace WDYM {
         retVal.r = 0.f;
 
         // Could be parallel
-        for (int i = 0; i < ORDER; i++) {
+        for (int i = 0; i < SIMD_CNT; i++) {
             getSample(i);
         }
 
@@ -97,11 +106,10 @@ namespace WDYM {
             retVal.r += oscOutputs[1][p];
         }*/
 
-        retVal.l = std::accumulate(oscOutputs[0].begin(), oscOutputs[0].end(), retVal.l);
-        retVal.r = std::accumulate(oscOutputs[1].begin(), oscOutputs[1].end(), retVal.l);
+        
 
-        if (abs(retVal.l) > 30 || abs(retVal.r) > 30)
-            jassertfalse;
+        retVal.l = std::accumulate(oscOutputs[0].begin(), oscOutputs[0].end(), retVal.l);
+        retVal.r = std::accumulate(oscOutputs[1].begin(), oscOutputs[1].end(), retVal.r);
 
         return retVal;
     }

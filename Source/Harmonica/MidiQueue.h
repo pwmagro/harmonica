@@ -37,7 +37,7 @@ typedef struct {
         }
 
         // make space if there is none
-        if (midiQ.size() >= maxVoices)
+        while (midiQ.size() >= maxVoices)
             midiQ.pop_front();
 
         // push to back of queue
@@ -80,6 +80,6 @@ typedef struct {
     void panic() {
         midiQ.clear();
     }
-    unsigned char maxVoices = 16;
+    unsigned char maxVoices = 8;
     std::deque<midiNote_t> midiQ;
 } midiQueue_t;

@@ -149,9 +149,7 @@ void HarmonicaAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     juce::dsp::AudioBlock<float> block(buffer);
     //buffer.clear();
 
-    //DBG(buffer.getReadPointer(0)[0]);
     harmonica.process(block, midiMessages);
-    //DBG(buffer.getReadPointer(0)[0]);
     //DBG('\n');
 
 }

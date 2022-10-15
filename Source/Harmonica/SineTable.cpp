@@ -22,22 +22,28 @@ namespace WDYM {
 
     }
 
-    float SineTable::getSample(float angle) {
-        auto v0 = wavetable[((int)angle + 0) % wavetable.size()];
-        auto v1 = wavetable[((int)angle + 1) % wavetable.size()];
-        auto v2 = wavetable[((int)angle + 2) % wavetable.size()];
-        auto v3 = wavetable[((int)angle + 3) % wavetable.size()];
-        auto offset = angle - floor(angle);
+    SineTable::SIMDFloat SineTable::getSample(SIMDFloat angle) {
+        // Turn phase angles into valid wavetable indeces
+        auto simdIndex0 = simdFmod(SIMDOp::truncate(angle.value), wavetable.size());
+        auto simdIndex1 = simdFmod(SIMDOp::truncate(SIMDOp::add(angle.value, ((SIMDFloat)1).value)), wavetable.size());
 
+        
+        SIMDFloat v0 = 0, v1 = 0;
+        
+        // Run through each entry in a register
+        for (size_t i = 0; i < SIMDFloat::size(); i++) {
+            // Load wavetable index
+            auto wtIndex0 = SIMDOp::get(simdIndex0.value, i);
+            auto wtIndex1 = SIMDOp::get(simdIndex1.value, i);
 
-        float slope0 = (v2 - v0) * 0.5f;
-        float slope1 = (v3 - v1) * 0.5f;
-        float v = v1 - v2;
-        float w = slope0 + v;
-        float a = w + v + slope1;
-        float b_neg = w + a;
-        float stage1 = a * offset - b_neg;
-        float stage2 = stage1 * offset + slope0;
-        return stage2 * offset + v1;
+            // Store wavetable entry into SIMD register
+            v0.set(i, wavetable[wtIndex0]);
+            v1.set(i, wavetable[wtIndex1]);
+        }
+
+        // use linterp instead of hermite for more speediness
+        auto offset = angle - SIMDFloat::truncate(angle.value);
+        auto slope = (v1 - v0) * 0.5f;
+        return v0 + (offset * slope);
     }
 }

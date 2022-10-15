@@ -45,7 +45,8 @@ namespace WDYM {
         }
 
         for (int i = 0; i < NUM_VOICES; i++) {
-            voices[i]->sawTest((i + 1) * 110.f);
+            //voices[i]->sawTest(110.f);
+            //voices[i]->sinTest(440.f);
         }
     }
 
@@ -74,12 +75,32 @@ namespace WDYM {
 
         auto ctx = juce::dsp::ProcessContextReplacing<float>(workingBlock);
 
+        for (int i = 0; i < noteRR.midiQ.size(); i++) {
+            if (i >= NUM_VOICES) break;
+            if (noteRR.midiQ[i].status == midiNote_t::note_QueuedToEnd)
+                voices[i]->disable();
+            else if (noteRR.midiQ[i].status == midiNote_t::note_QueuedToStart) {
+                voices[i]->setMidiNote(noteRR.midiQ[i].note, noteRR.midiQ[i].mag);
+                noteRR.midiQ[i].status = midiNote_t::note_Playing;
+            }
+        }
+
+        for (auto n = noteRR.midiQ.begin(); n != noteRR.midiQ.end();) {
+            if (n->status == midiNote_t::note_QueuedToEnd)
+                n = noteRR.midiQ.erase(n);
+            else
+                ++n;
+        }
+
+        for (int i = noteRR.midiQ.size(); i < NUM_VOICES; i++) {
+            voices[i]->disable();
+        }
+
         auto voiceProcess = [&](int i) {
             if (voices[i]->isPlaying()) {
                 voices[i]->process(audioBlock);
             }
         };
-
         squeeze::ParallelFor(threadPool, (size_t)0, NUM_VOICES, voiceProcess);
 
         for (int i = 0; i < NUM_VOICES; i++) {
@@ -89,6 +110,8 @@ namespace WDYM {
                 juce::FloatVectorOperations::add(audioBlock.getChannelPointer(1), b[1].data(), audioBlock.getNumSamples());
             }
         }
+
+        //DBG(juce::FloatVectorOperations::findMaximum(audioBlock.getChannelPointer(0), audioBlock.getNumSamples()));
 
         //audioBlock.copyFrom(ctx.getOutputBlock());
 

@@ -12,12 +12,16 @@
 #include <JuceHeader.h>
 #include "SineTable.h"
 //#include "../Common/Squeeze.h"
+#include <omp.h>
 
-#define ORDER   384u
+#define ORDER   512u
+#define SIMD_CNT    (ORDER / simdSize)
 
 namespace WDYM {
     class Voice {
     public:
+        using SIMDFloat = juce::dsp::SIMDRegister<float>;
+        using SIMDOp = juce::dsp::SIMDNativeOps<float>;
         Voice(SineTable& st, juce::ThreadPool& tp);
         ~Voice();
 
@@ -29,44 +33,57 @@ namespace WDYM {
 
         bool isPlaying() { return enabled; }
 
-        void sawTest(float freq);
+        void setMidiNote(int id, float amplitude) {
+            amp = amplitude;
+            midiNote = id;
+            sinTest(juce::MidiMessage::getMidiNoteInHertz(id)); }
+        int getMidiNote() { return midiNote; }
 
+        void sawTest(float freq);
+        void sinTest(float freq);
+
+        void disable() { enabled = false; };
+
+        // each Osc struct contains multiple actual oscillators
         typedef struct Osc {
         public:
-            float phase = 0;
-            float phaseOffset = 0;
-            float stepSize = 1;
-            float amplitude = 0;
-            bool en = false;
+            alignas (32) SIMDFloat phase = 0;
+            alignas (32) SIMDFloat phaseOffset = 0;
+            alignas (32) SIMDFloat stepSize = 1;
+            alignas (32) SIMDFloat amplitude = 0;
+            alignas (32) SIMDFloat en = false;
         };
 
     private:
+        
         int numCpus;
         juce::dsp::ProcessSpec spec;
         juce::ThreadPool& threadPool;
 
         bool enabled;
         float baseFreq;
+        int midiNote;
         float amp = 0.8;
 
-        typedef std::array<Osc, ORDER> MonoVoice;
+        static constexpr size_t simdSize = SIMDFloat::size();
+        typedef std::array<Osc, SIMD_CNT> MonoVoice;
         struct {
             MonoVoice left;
             MonoVoice right;
         } voices;
 
         typedef struct StereoSample {
-            float l;
-            float r;
+            float l = 0.f;
+            float r = 0.f;
         };
 
         std::array<std::vector<float>, 2> localBuff;
         
-        std::array<std::array<float, ORDER>, 2> oscOutputs;
+        std::array<std::array<float, SIMD_CNT>, 2> oscOutputs;
 
         SineTable& sineTable;
 
-        void setOscParams(Osc& osc, float freq, float amp);
+        void setOscParams(Osc& osc, float freq, float amp, int simdIndex);
         StereoSample getNextSample();
     };
 }
